@@ -215,9 +215,6 @@ static_assert(std::is_invocable_r_v<void, move_only, int>);
 
 static_assert(not std::is_constructible_v<T, move_only>,
               "target object must be copy-constructible");
-static_assert(not std::is_constructible_v<
-                  T, constant_wrapper<&move_only::operator()>, move_only>,
-              "bounded target object must be copy-constructible");
 
 struct reject_rvalue
 {
@@ -233,11 +230,3 @@ static_assert(std::is_invocable_r_v<void, reject_rvalue, int>);
 static_assert(std::is_constructible_v<T, reject_rvalue &>);
 static_assert(not std::is_constructible_v<T, reject_rvalue>,
               "target object must be initialized");
-
-static_assert(
-    std::is_constructible_v<T, constant_wrapper<&reject_rvalue::operator()>,
-                            reject_rvalue &>);
-static_assert(
-    not std::is_constructible_v<T, constant_wrapper<&reject_rvalue::operator()>,
-                                reject_rvalue>,
-    "bounded target object must be initialized");

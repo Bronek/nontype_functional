@@ -33,5 +33,5 @@ static constexpr struct baz_t final
 auto main() -> int
 {
     function_ref<int(baz_t)> fn(cw<foo>);
-    assert(fn(baz) == 2); // assertion failure
+    assert(fn(baz) == 2);
 }

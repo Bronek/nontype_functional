@@ -37,7 +37,7 @@ suite safety = []
 
             when("it rebinds to a nttp pointer to member function") = [&]
             {
-                fr = cw<&A::g>;
+                fr = fn<&A::g>;
 
                 then("it never dangles") = [&] { expect(fr(a) == ch<'g'>); };
             };

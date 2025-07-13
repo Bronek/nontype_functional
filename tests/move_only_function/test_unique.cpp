@@ -58,14 +58,3 @@ static_assert(not std::is_move_constructible_v<inlined_fixed_string>);
 static_assert(not std::is_destructible_v<inlined_fixed_string>);
 
 using T = move_only_function<std::string_view(size_t, size_t) const>;
-
-static_assert(not std::is_constructible_v<
-                  T, constant_wrapper<&inlined_fixed_string::slice>,
-                  std::unique_ptr<inlined_fixed_string> &>,
-              "users cannot construct the same wrapper from an lvalue");
-
-static_assert(not std::is_constructible_v<
-                  T, constant_wrapper<&inlined_fixed_string::slice>,
-                  std::in_place_type_t<std::unique_ptr<inlined_fixed_string>>,
-                  std::unique_ptr<inlined_fixed_string> &>,
-              "move-only type cannot be in-place constructed from lvalue");

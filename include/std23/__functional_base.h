@@ -4,10 +4,11 @@
 #include <functional>
 #include <utility>
 
-#include "constant_wrapper.hpp"
-
 namespace std23
 {
+
+template<auto f>
+struct fn_t;
 
 using std::in_place_type;
 using std::in_place_type_t;
@@ -56,9 +57,9 @@ template<class S, template<class...> class Self>
 inline constexpr bool _looks_nullable_to =
     _looks_nullable_to_impl<std::remove_cvref_t<S>, Self>;
 
-template<class T> inline constexpr bool _is_not_constant_wrapper_t = true;
-template<auto f, typename T>
-inline constexpr bool _is_not_constant_wrapper_t<constant_wrapper<f, T>> =
+template<class T> inline constexpr bool _is_not_fn_t = true;
+template<auto f>
+inline constexpr bool _is_not_fn_t<fn_t<f>> =
     false;
 
 template<class T> struct _adapt_signature;
