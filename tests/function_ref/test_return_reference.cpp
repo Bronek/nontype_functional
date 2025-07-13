@@ -48,21 +48,21 @@ suite return_reference = []
 
             when("used as an unbound method") = [=]
             {
-                function_ref<int const &(identity_fobj const &)> fn =
-                    cw<&identity_fobj::x>;
-                expect(std::addressof(fn(obj)) == &obj.x);
+                function_ref<int const &(identity_fobj const &)> fn1 =
+                    fn<&identity_fobj::x>;
+                expect(std::addressof(fn1(obj)) == &obj.x);
             };
 
             when("used as a non-const bound method") = [=]() mutable
             {
-                function_ref fn = {cw<&identity_fobj::x>, obj};
-                expect(std::addressof(fn()) == &obj.x);
+                function_ref fn1 = {fn<&identity_fobj::x>, obj};
+                expect(std::addressof(fn1()) == &obj.x);
             };
 
             when("used as a const bound method") = [=]
             {
-                function_ref fn = {cw<&identity_fobj::x>, obj};
-                expect(std::addressof(fn()) == &obj.x);
+                function_ref fn1 = {fn<&identity_fobj::x>, obj};
+                expect(std::addressof(fn1()) == &obj.x);
             };
         };
     };

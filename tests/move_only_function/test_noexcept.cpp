@@ -82,8 +82,3 @@ static_assert(std::is_constructible_v<Y, decltype(&A::data)>,
 
 using T = move_only_function<int()>;
 using U = move_only_function<int() noexcept>;
-
-static_assert(not std::is_constructible_v<U, constant_wrapper<&A::g>, A>,
-              "member function may throw");
-static_assert(not std::is_constructible_v<U, constant_wrapper<h>, A>,
-              "explicit member function may throw");

@@ -263,28 +263,6 @@ template<class S, class R, class... Args> class function<S, R(Args...)>
         ::new (storage_location()) T(std::forward<F>(f));
     }
 
-    template<auto f>
-    function(constant_wrapper<f>) noexcept
-        requires is_invocable_using<typename constant_wrapper<f>::value_type>
-    {
-        ::new (storage_location())
-            unbound_target_object<constant_wrapper<f>::value>;
-    }
-
-    template<auto f, class U>
-    function(constant_wrapper<f>, U &&obj) noexcept(
-        std::is_nothrow_constructible_v<
-            bound_target_object_for<constant_wrapper<f>::value, U>, U>)
-        requires is_invocable_using<typename constant_wrapper<f>::value_type,
-                                    lvalue<U>> and
-                 is_viable_initializer<U>
-    {
-        using T = bound_target_object_for<constant_wrapper<f>::value, U>;
-        static_assert(sizeof(T) <= sizeof(storage_));
-
-        ::new (storage_location()) T(std::forward<U>(obj));
-    }
-
     function(function const &other) { other.target()->copy_into(storage_); }
     function(function &&other) noexcept { other.target()->move_into(storage_); }
 
@@ -349,16 +327,6 @@ function(F *) -> function<_strip_noexcept_t<F>>;
 template<class T>
 function(T) -> function<_strip_noexcept_t<
                 _drop_first_arg_to_invoke_t<decltype(&T::operator()), void>>>;
-
-template<auto V>
-function(constant_wrapper<V>)
-    -> function<_strip_noexcept_t<
-        _adapt_signature_t<typename constant_wrapper<V>::value_type>>>;
-
-template<auto V, class T>
-function(constant_wrapper<V>, T)
-    -> function<_strip_noexcept_t<_drop_first_arg_to_invoke_t<
-        typename constant_wrapper<V>::value_type, T>>>;
 
 } // namespace std23
 

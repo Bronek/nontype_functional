@@ -15,15 +15,15 @@ struct B
 
 constexpr int constexpr_test1()
 {
-    function_ref<int()> fr = cw<f>;
-    fr = cw<cf>; // cf is a constexpr function
+    function_ref<int()> fr = fn<f>;
+    fr = fn<cf>; // cf is a constexpr function
     return fr();
 }
 
 constexpr int constexpr_test2()
 {
     B b;
-    function_ref<int(B)> fmr = cw<&B::data>;
+    function_ref<int(B)> fmr = fn<&B::data>;
     return fmr(b);
 }
 
@@ -35,7 +35,7 @@ constexpr int f()
     return 42;
 }
 
-constexpr std23::function_ref<int()> r = std23::cw<f>;
+constexpr std23::function_ref<int()> r = std23::fn<f>;
 static_assert(r() == 42);
 
 } // namespace
