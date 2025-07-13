@@ -106,21 +106,6 @@ suite cvref = []
                 expect(call(std::cref(fn)) == const_);
             };
         };
-
-        given("an object without operator()") = [=]
-        {
-            NoCall a;
-
-            then("a member function may be used in place of operator()") =
-                [&](auto t)
-            {
-                expect(call({t, a}) == ch<'k'>) << "by name";
-                expect(call({t, &a}) == ch<'k'>) << "by pointer";
-                expect(call({t, std::ref(a)}) == ch<'k'>) << "by refwrap";
-            } | std::tuple(cw<&NoCall::unspecific_value_category>,
-                           cw<&NoCall::immutable>, cw<&NoCall::lvalue_only>,
-                           cw<&NoCall::immutable_lvalue_only>);
-        };
     };
 
     feature("const-qualified") =
@@ -159,20 +144,6 @@ suite cvref = []
                 UnspecificValueCategory fn;
                 expect(call(std::reference_wrapper(fn)) == empty);
             };
-        };
-
-        given("an object without operator()") = [=]
-        {
-            NoCall a;
-
-            then("a member function may be used in place of operator()") =
-                [=](auto t)
-            {
-                expect(call({t, a}) == ch<'k'>) << "by name";
-                expect(call({t, &a}) == ch<'k'>) << "by pointer";
-                expect(call({t, std::ref(a)}) == ch<'k'>) << "by refwrap";
-            } | std::tuple(cw<&NoCall::immutable>,
-                           cw<&NoCall::immutable_lvalue_only>);
         };
     };
 
@@ -233,22 +204,6 @@ suite cvref = []
             then("the object is called only as a copy") = [=] {
                 expect(call(ImmutableCall<UnspecificValueCategory>{}) == empty);
             };
-        };
-
-        given("an object without operator()") = [=]
-        {
-            NoCall a;
-
-            then("a member function may be used in place of operator()") =
-                [&](auto t)
-            {
-                expect(call({t, a}) == ch<'k'>) << "by name";
-
-                static_assert(
-                    not is_valid<T>([&](auto t) -> decltype(call({t, &a})) {}),
-                    "calling pointer-to-object works as if dereferenced");
-            } | std::tuple(cw<&NoCall::rvalue_only>,
-                           cw<&NoCall::immutable_rvalue_only>);
         };
     };
 

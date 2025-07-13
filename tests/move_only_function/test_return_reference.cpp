@@ -46,31 +46,5 @@ suite return_reference = []
                 expect(std::addressof(fn()) == &x);
             };
         };
-
-        given("a pointer to member object") = []
-        {
-            int x;
-            refwrap obj = x;
-
-            when("used as an unbound method") = [&]
-            {
-                move_only_function<int &(refwrap<int> const &)> fn =
-                    cw<&refwrap<int>::get>;
-                expect(std::addressof(fn(obj)) == &x);
-            };
-
-            when("used as a non-const bound method") = [&]
-            {
-                move_only_function<int &()> fn = {cw<&refwrap<int>::get>, obj};
-                expect(std::addressof(fn()) == &x);
-            };
-
-            when("used as a const bound method") = [&]
-            {
-                move_only_function<int &() const> fn = {cw<&refwrap<int>::get>,
-                                                        obj};
-                expect(std::addressof(fn()) == &x);
-            };
-        };
     };
 };

@@ -43,37 +43,6 @@ suite noexcept_qualified = []
             expect(nothrow_call([]() noexcept { return BODYN(noexcept_); }) ==
                    noexcept_);
         };
-
-        given("a noexcept structual callable") = []
-        { expect(nothrow_call(cw<f_good>) == free_function); };
-    };
-
-    feature("noexcept signature allows binding nothrow nttp") = []
-    {
-        given("an object without operator()") = []
-        {
-            A_good x;
-
-            when("binding by name") = [&]
-            { expect(nothrow_call({cw<&A_good::g>, x}) == ch<'g'>); };
-
-            when("binding by pointer") = [&]
-            { expect(nothrow_call({cw<&A_good::g>, &x}) == ch<'g'>); };
-
-            when("binding by reference_wrapper") = [&]
-            { expect(nothrow_call({cw<&A_good::g>, std::ref(x)}) == ch<'g'>); };
-        };
-
-        given("an object without a noexcept member function") = []
-        {
-            A a;
-
-            then("you can treat member access as a nothrow call") = [&]
-            { expect(nothrow_call({cw<&A::data>, a}) == 99_i); };
-
-            then("you can treat a noexcept free function as its memfn") = [&]
-            { expect(nothrow_call({cw<h_good>, a}) == ch<'h'>); };
-        };
     };
 
     feature("noexcept signature and unqual signature can overload") = []
@@ -114,13 +83,7 @@ static_assert(std::is_constructible_v<Y, decltype(&A::data)>,
 using T = move_only_function<int()>;
 using U = move_only_function<int() noexcept>;
 
-static_assert(std::is_constructible_v<T, constant_wrapper<&A::g>, A>);
 static_assert(not std::is_constructible_v<U, constant_wrapper<&A::g>, A>,
               "member function may throw");
-static_assert(std::is_constructible_v<T, constant_wrapper<&A_good::g>, A_good>);
-static_assert(std::is_constructible_v<U, constant_wrapper<&A_good::g>, A_good>);
-static_assert(std::is_constructible_v<T, constant_wrapper<h>, A>);
 static_assert(not std::is_constructible_v<U, constant_wrapper<h>, A>,
               "explicit member function may throw");
-static_assert(std::is_constructible_v<T, constant_wrapper<h_good>, A>);
-static_assert(std::is_constructible_v<U, constant_wrapper<h_good>, A>);

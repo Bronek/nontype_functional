@@ -363,35 +363,6 @@ class move_only_function<S, R(Args...)>
         obj_ = _take_reference(std::forward<F>(f));
     }
 
-    template<auto f>
-    move_only_function(constant_wrapper<f>) noexcept
-        requires is_invocable_using<typename constant_wrapper<f>::value_type>
-        : vtbl_(trait::template unbound_callable_target<
-                constant_wrapper<f>::value>)
-    {}
-
-    template<auto f, class T, class VT = std::decay_t<T>>
-    move_only_function(constant_wrapper<f>, T &&x) noexcept(
-        std::is_nothrow_invocable_v<decltype(_take_reference), T>)
-        requires is_callable_as_if_from<constant_wrapper<f>::value, VT> and
-                     std::is_constructible_v<VT, T>
-        : vtbl_(
-              trait::template bound_callable_target<constant_wrapper<f>::value,
-                                                    std::unwrap_ref_decay_t<T>,
-                                                    inv_quals_f>),
-          obj_(_take_reference(std::forward<T>(x)))
-    {}
-
-    template<class M, class C, M C::*f, class T>
-    move_only_function(constant_wrapper<f>, std::unique_ptr<T> &&x) noexcept
-        requires std::is_base_of_v<C, T> and
-                     is_callable_as_if_from<constant_wrapper<f>::value, T *>
-        : vtbl_(
-              trait::template boxed_callable_target<constant_wrapper<f>::value,
-                                                    T>),
-          obj_(x.release())
-    {}
-
     template<class T, class... Inits>
     explicit move_only_function(in_place_type_t<T>, Inits &&...inits) noexcept(
         std::is_nothrow_invocable_v<decltype(_build_reference<T>), Inits...>)
@@ -412,50 +383,6 @@ class move_only_function<S, R(Args...)>
                      std::is_constructible_v<T, decltype((ilist)), Inits...>
         : vtbl_(trait::template callable_target<std::unwrap_reference_t<T>,
                                                 inv_quals_f>),
-          obj_(_build_reference<T>(ilist, std::forward<Inits>(inits)...))
-    {
-        static_assert(std::is_same_v<std::decay_t<T>, T>);
-    }
-
-    template<auto f, class T, class... Inits>
-    explicit move_only_function(constant_wrapper<f>, in_place_type_t<T>,
-                                Inits &&...inits) noexcept( //
-        std::is_nothrow_invocable_v<decltype(_build_reference<T>), Inits...>)
-        requires is_callable_as_if_from<constant_wrapper<f>::value, T> and
-                     std::is_constructible_v<T, Inits...>
-        : vtbl_(
-              trait::template bound_callable_target<constant_wrapper<f>::value,
-                                                    std::unwrap_reference_t<T>,
-                                                    inv_quals_f>),
-          obj_(_build_reference<T>(std::forward<Inits>(inits)...))
-    {
-        static_assert(std::is_same_v<std::decay_t<T>, T>);
-    }
-
-    template<class M, class C, M C::*f, class T, class... Inits>
-    explicit move_only_function(constant_wrapper<f>,
-                                in_place_type_t<std::unique_ptr<T>>,
-                                Inits &&...inits) noexcept( //
-        std::is_nothrow_constructible_v<std::unique_ptr<T>, Inits...>)
-        requires std::is_base_of_v<C, T> and
-                 is_callable_as_if_from<constant_wrapper<f>::value, T *> and
-                 std::is_constructible_v<std::unique_ptr<T>, Inits...>
-        : move_only_function(constant_wrapper<f>::value,
-                             std::unique_ptr<T>(std::forward<Inits>(inits)...))
-    {}
-
-    template<auto f, class T, class U, class... Inits>
-    explicit move_only_function(constant_wrapper<f>, in_place_type_t<T>,
-                                initializer_list<U> ilist,
-                                Inits &&...inits) noexcept( //
-        std::is_nothrow_invocable_v<decltype(_build_reference<T>),
-                                    decltype((ilist)), Inits...>)
-        requires is_callable_as_if_from<constant_wrapper<f>::value, T> and
-                     std::is_constructible_v<T, decltype((ilist)), Inits...>
-        : vtbl_(
-              trait::template bound_callable_target<constant_wrapper<f>::value,
-                                                    std::unwrap_reference_t<T>,
-                                                    inv_quals_f>),
           obj_(_build_reference<T>(ilist, std::forward<Inits>(inits)...))
     {
         static_assert(std::is_same_v<std::decay_t<T>, T>);

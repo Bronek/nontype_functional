@@ -1,0 +1,8 @@
+CompileFlags:
+  Add: [-xc++, -std=c++2c, -Wall, -I., -I.., -I../include/, -I../../include/ ]
+  Remove: -W*
+  Compiler: clang++
+Diagnostics:
+  ClangTidy:
+    Add: [modernize*, bugprone*, readability*]
+    Remove: [readability-static-accessed-through-instance, readability-magic-numbers]

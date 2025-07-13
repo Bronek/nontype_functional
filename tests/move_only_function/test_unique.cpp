@@ -59,60 +59,11 @@ static_assert(not std::is_destructible_v<inlined_fixed_string>);
 
 using T = move_only_function<std::string_view(size_t, size_t) const>;
 
-suite unique_callable = []
-{
-    using namespace bdd;
-    using namespace std::literals;
-
-    feature("type-erase a boxed bound instance method") = []
-    {
-        given("a move_only_function storing a unique_ptr") = []
-        {
-            T fn(cw<&inlined_fixed_string::slice>,
-                 inlined_fixed_string::make_unique("coffee engineering"sv));
-
-            when("calling the wrapper") = [&]
-            {
-                then("the object works as an lvalue") = [&]
-                { expect(fn(0, 6) == "coffee"sv); };
-            };
-
-            when("moving the wrapper") = [fn2 = std::move(fn)]
-            {
-                then("the object behaves as if it is boxed") = [&]
-                { expect(fn2(7, 10) == "eng"sv); };
-            };
-        };
-
-        given("a move_only_function in-place constructed a unique_ptr") = []
-        {
-            T fn(cw<&inlined_fixed_string::slice>,
-                 std::in_place_type<std::unique_ptr<inlined_fixed_string>>,
-                 inlined_fixed_string::make("destroying delete"sv));
-
-            when("moving the wrapper") = [&]
-            {
-                T fn2 = std::move(fn);
-
-                then("the object behaves as if it is boxed") = [&]
-                { expect(fn2(11, 17) == "delete"sv); };
-            };
-        };
-    };
-};
-
-static_assert(
-    std::is_constructible_v<T, constant_wrapper<&inlined_fixed_string::slice>,
-                            std::unique_ptr<inlined_fixed_string>>);
 static_assert(not std::is_constructible_v<
                   T, constant_wrapper<&inlined_fixed_string::slice>,
                   std::unique_ptr<inlined_fixed_string> &>,
               "users cannot construct the same wrapper from an lvalue");
 
-static_assert(std::is_constructible_v<
-              T, constant_wrapper<&inlined_fixed_string::slice>,
-              std::in_place_type_t<std::unique_ptr<inlined_fixed_string>>,
-              inlined_fixed_string *>);
 static_assert(not std::is_constructible_v<
                   T, constant_wrapper<&inlined_fixed_string::slice>,
                   std::in_place_type_t<std::unique_ptr<inlined_fixed_string>>,

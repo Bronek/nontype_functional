@@ -132,29 +132,6 @@ suite inplace = []
                     "does not convert from braced-init-list");
             };
         };
-
-        feature("in-place construct types without operator()") = []
-        {
-            given("a type with user-defined ctors") = []
-            {
-                move_only_function<std::string()> fn(
-                    cw<[](std::vector<double> &v)
-                       { return std::to_string(v.size()); }>,
-                    in_place_type<std::vector<double>>, 4u);
-
-                then("in-place construct") = [&] { expect(fn() == "4"sv); };
-            };
-
-            given("a type with a initializer_list ctor") = []
-            {
-                move_only_function<int()> fn(
-                    cw<[](std::string const &s) { return std::stoi(s); }>,
-                    in_place_type<std::string>, {'5', '9', '2', '\0'});
-
-                then("passing braced-init-list") = [&]
-                { expect(fn() == 592_i); };
-            };
-        };
     };
 };
 
@@ -167,11 +144,3 @@ static_assert(std::is_constructible_v<
 
 using W = move_only_function<int()>;
 using Vec = std::vector<double>;
-
-// extension
-static_assert(std::is_nothrow_constructible_v<
-              W, constant_wrapper<[](Vec *) { return 0; }>,
-              std23::in_place_type_t<Vec *>>);
-static_assert(std::is_nothrow_constructible_v<
-              W, constant_wrapper<[](Vec &) { return 0; }>,
-              std23::in_place_type_t<std::reference_wrapper<Vec>>, Vec &>);
